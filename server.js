@@ -4,6 +4,7 @@ const dotenv=require("dotenv");
 const authRoutes=require("./routes/authRoutes");
 const dns=require("dns");
 const protect = require("./middleware/authMiddleware");
+const productRoutes=require("./routes/productRoutes");
 
 
 dns.setServers([
@@ -29,6 +30,10 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+
+
+app.use("/api/products", productRoutes);
+
 //test routes
 app.get("/",(req,res)=>{
     res.json({
