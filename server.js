@@ -5,6 +5,7 @@ const authRoutes=require("./routes/authRoutes");
 const dns=require("dns");
 const protect = require("./middleware/authMiddleware");
 const productRoutes=require("./routes/productRoutes");
+const orderRoutes=require("./routes/orderRoutes")
 
 
 dns.setServers([
@@ -33,6 +34,8 @@ app.use("/api/auth", authRoutes);
 
 
 app.use("/api/products", productRoutes);
+
+app.use("/api/orders", orderRoutes);
 
 //test routes
 app.get("/",(req,res)=>{
