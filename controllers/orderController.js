@@ -14,7 +14,7 @@ const createOrder=async (req,res)=> {
 
         //validate required data
         if (!items || items.length===0){
-            return res.ststus(400).json({
+            return res.status(400).json({
                 message: "Order must contain at least one product",
             });
 
@@ -37,7 +37,7 @@ const createOrder=async (req,res)=> {
             subtotal,
             tax,
             total,
-            paymentMethod: paymentMethod || "mpesa",
+            paymentMethod: paymentMethod || "pending",
             status:"pending",
         })
 

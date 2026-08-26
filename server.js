@@ -6,7 +6,8 @@ const dns=require("dns");
 const protect = require("./middleware/authMiddleware");
 const productRoutes=require("./routes/productRoutes");
 const orderRoutes=require("./routes/orderRoutes")
-
+const dashboardRoutes=require("./routes/dashboardRoutes")
+const mpesaRoutes=require("./routes/mpesaRoutes");
 
 dns.setServers([
     "8.8.8.8",
@@ -36,6 +37,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
 app.use("/api/orders", orderRoutes);
+
+app.use("/api/dashboard",dashboardRoutes);
+
+app.use("/api/mpesa", mpesaRoutes);
 
 //test routes
 app.get("/",(req,res)=>{
