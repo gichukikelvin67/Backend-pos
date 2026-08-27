@@ -37,7 +37,7 @@ const createOrder=async (req,res)=> {
             subtotal,
             tax,
             total,
-            paymentMethod: paymentMethod || "pending",
+            paymentMethod: paymentMethod || "mpesa",
             status:"pending",
         })
 
@@ -54,6 +54,50 @@ const createOrder=async (req,res)=> {
         })
     }
 }
+// GET ALL ORDERS
+
+const getOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("items.product")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Get orders error:", error);
+
+    res.status(500).json({
+      message: "Failed to get transactions",
+    });
+  }
+};
+
+
+// GET SINGLE ORDER
+
+const getOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate("items.product");
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Transaction not found",
+      });
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Get order error:", error);
+
+    res.status(500).json({
+      message: "Failed to get transaction",
+    });
+  }
+};
+
 module.exports={
     createOrder,
-}
+    getOrders,
+    getOrder,
+};

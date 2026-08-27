@@ -1,4 +1,5 @@
 const axios = require("axios");
+const Order=require("../models/Order");
 
 // Convert Kenyan phone numbers to 254XXXXXXXXX
 function normalizePhone(phone) {
@@ -61,6 +62,20 @@ async function stkPush(req, res) {
       return res.status(400).json({
         message: "Amount must be a valid number greater than 0",
       });
+    }
+
+    if(!orderId){
+        return res.status(400).json({
+            message: "Order ID is required",
+        })
+    }
+
+    const order=await Order.findById(orderId);
+
+    if(!order){
+        return res.status(400).json({
+            message: "Order not found",
+    })
     }
 
     // Get access token
@@ -129,8 +144,25 @@ async function stkPush(req, res) {
 
     console.log("STK Push response:", response.data);
 
+    //save mpesa details to order
+
+    order.phone=normalizedPhone;
+    order.paymentMethod="mpesa";
+    order.status ="pending";
+
+    order.merchantRequestID=
+    response.data.MerchantRequestID  || "";
+
+    order.checkoutRequestID=
+    response.data.CheckoutRequestID  || "";
+
+    await order.save();
+
     return res.status(200).json({
       message: "STK Push sent successfully",
+
+      orderId: order._id,
+
       phone: normalizedPhone,
       ...response.data,
     });
@@ -153,6 +185,186 @@ async function stkPush(req, res) {
   }
 }
 
+
+
+
+// M-PESA CALLBACK
+
+async function mpesaCallback(req, res) {
+  try {
+    console.log("=================================");
+    console.log("M-PESA CALLBACK RECEIVED");
+    console.log("=================================");
+
+    console.log(
+      JSON.stringify(req.body, null, 2)
+    );
+
+    const callback =
+      req.body?.Body?.stkCallback;
+
+    if (!callback) {
+      console.log("Invalid callback received");
+
+      return res.status(200).json({
+        ResultCode: 0,
+        ResultDesc: "Callback received",
+      });
+    }
+
+    const checkoutRequestID =
+      callback.CheckoutRequestID;
+
+    const resultCode =
+      callback.ResultCode;
+
+    
+    // Find the order
+    
+
+    const order =
+      await Order.findOne({
+        checkoutRequestID,
+      });
+
+    if (!order) {
+      console.log(
+        "Order not found:",
+        checkoutRequestID
+      );
+
+      // Always acknowledge Safaricom callback
+      return res.status(200).json({
+        ResultCode: 0,
+        ResultDesc: "Callback received",
+      });
+    }
+
+    
+    // Payment successful
+    
+
+    if (resultCode === 0) {
+
+      const metadata =
+        callback.CallbackMetadata?.Item || [];
+
+      let mpesaReceiptNumber = "";
+      let transactionDate = "";
+      let phone = "";
+
+      metadata.forEach((item) => {
+
+        if (
+          item.Name ===
+          "MpesaReceiptNumber"
+        ) {
+          mpesaReceiptNumber =
+            String(item.Value);
+        }
+
+        if (
+          item.Name ===
+          "TransactionDate"
+        ) {
+          transactionDate =
+            String(item.Value);
+        }
+
+        if (
+          item.Name ===
+          "PhoneNumber"
+        ) {
+          phone =
+            String(item.Value);
+        }
+
+      });
+
+      
+      // Update order
+      
+
+      order.status = "paid";
+
+      order.mpesaReceiptNumber =
+        mpesaReceiptNumber;
+
+      order.transactionDate =
+        transactionDate;
+
+      if (phone) {
+        order.phone = phone;
+      }
+
+      await order.save();
+
+      console.log(
+        "Payment successful!"
+      );
+
+      console.log(
+        "Order:",
+        order._id
+      );
+
+      console.log(
+        "Receipt:",
+        mpesaReceiptNumber
+      );
+
+    } else {
+
+      
+      // Payment failed/cancelled
+    
+
+      order.status = "cancelled";
+
+      await order.save();
+
+      console.log(
+        "M-Pesa payment failed/cancelled"
+      );
+
+      console.log(
+        "ResultCode:",
+        resultCode
+      );
+
+      console.log(
+        "ResultDesc:",
+        callback.ResultDesc
+      );
+    }
+
+    
+    // Respond to Safaricom
+    
+
+    return res.status(200).json({
+      ResultCode: 0,
+      ResultDesc: "Callback processed successfully",
+    });
+
+  } catch (error) {
+
+    console.error(
+      "M-Pesa callback error:",
+      error
+    );
+
+    // Still acknowledge Safaricom
+    return res.status(200).json({
+      ResultCode: 0,
+      ResultDesc: "Callback received",
+    });
+  }
+}
+
+
+
 module.exports = {
   stkPush,
+  mpesaCallback,
 };

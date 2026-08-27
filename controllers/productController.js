@@ -95,7 +95,7 @@ const updateProduct=async (req,res)=>{
                 runValidators: true,
             }
         )
-        if(!updateProduct){
+        if(!updatedProduct){
             return res.status(404).json({
                 message:"Product not found",
             })
@@ -107,7 +107,7 @@ const updateProduct=async (req,res)=>{
 
     }catch(error){
         console.error("Update product error:", error);
-        res.status(500).jso({
+        res.status(500).json({
             message:"Failed to update product",
         })
     }

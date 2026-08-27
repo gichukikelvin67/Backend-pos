@@ -30,6 +30,13 @@ const orderSchema=new mongoose.Schema(
             required:true,
         },
 
+        phone:{
+            type:String,
+            default:"",
+        },
+
+
+
         subtotal:{
             type:Number,
             required:true,
@@ -54,7 +61,26 @@ const orderSchema=new mongoose.Schema(
             type:String,
             enum:["pending", "paid", "cancelled"],
             default:"pending",
-        }
+        },
+        merchantRequestID:{
+            type: String,
+            default:"",
+        },
+
+        checkoutRequestID:{
+            type:String,
+            default:"",
+        },
+
+        mpesaReceiptNumber: { 
+            type: String,
+             default: "",
+             },
+
+             transactionDate: {
+                 type: String,
+                  default: "",
+                 },
     },
     {
         timestamps: true,

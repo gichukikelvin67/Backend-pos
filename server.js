@@ -8,6 +8,7 @@ const productRoutes=require("./routes/productRoutes");
 const orderRoutes=require("./routes/orderRoutes")
 const dashboardRoutes=require("./routes/dashboardRoutes")
 const mpesaRoutes=require("./routes/mpesaRoutes");
+const searchRoutes= require("./routes/searchRoutes");
 
 dns.setServers([
     "8.8.8.8",
@@ -41,6 +42,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/dashboard",dashboardRoutes);
 
 app.use("/api/mpesa", mpesaRoutes);
+
+app.use("/api/search", searchRoutes);
 
 //test routes
 app.get("/",(req,res)=>{
