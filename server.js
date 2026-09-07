@@ -1,3 +1,6 @@
+// first load enviroment variables
+require("dotenv").config();
+//now load your packages and route modules
 const express=require("express");
 const cors=require("cors");
 const dotenv=require("dotenv");
@@ -9,6 +12,7 @@ const orderRoutes=require("./routes/orderRoutes")
 const dashboardRoutes=require("./routes/dashboardRoutes")
 const mpesaRoutes=require("./routes/mpesaRoutes");
 const searchRoutes= require("./routes/searchRoutes");
+
 
 dns.setServers([
     "8.8.8.8",
