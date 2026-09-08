@@ -262,8 +262,9 @@ const verifyEmail = async (req, res) => {
     const { token, email } = req.query;
 
     // Check that both values exist
-    if (!token || !email) {
+    if (!token || !email || typeof token !== "string" || typeof email !== "string") {
       return res.status(400).json({
+        success:false,
         message: "Invalid verification link",
       });
     }
@@ -288,6 +289,7 @@ const verifyEmail = async (req, res) => {
     // Token does not exist or has expired
     if (!user) {
       return res.status(400).json({
+        success:false,
         message: "Verification link is invalid or has expired",
       });
     }
@@ -309,11 +311,12 @@ const verifyEmail = async (req, res) => {
     console.error("Email verification error:", error);
 
     return res.status(500).json({
+      success:false,
       message: "Something went wrong while verifying your email",
     });
-  }
-};
 
+  }
+}
 
 
 //EXPORT
