@@ -128,8 +128,8 @@ const register = async (req, res) => {
       emailVerificationExpires: verificationExpires,
     });
 
-    await senderVerificationEmail(
-        user.Email,
+    await sendVerificationEmail(
+        user.email,
         user.name,
         verificationToken
     )
